@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -13,8 +12,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
-@TeleOp(name="MovimentadorV2", group="Linear OpMode")
-public class automovimentov2 extends LinearOpMode {
+@TeleOp(name="CorretordeDistancia", group="Linear OpMode")
+public class CorretordeDistancia extends LinearOpMode {
 
     // Declare OpMode members for each of the 4 motors.
     private ElapsedTime runtime = new ElapsedTime();
@@ -96,15 +95,14 @@ public class automovimentov2 extends LinearOpMode {
                 }
 
                 if (movingToTarget) {
-                    double Kp = 0.02;
-                    double Ke = 0.04;
-                    double minPower = 0.08;
-
                     double distanceError = desiredDistance - distance;
+                    double Kp = 0.02;  // ganho proporcional
+                    double Ke = 0.05;  // ganho exponencial
 
                     double drivingAdjust = Kp * distanceError * Math.exp(-Ke * Math.abs(distanceError));
-                    drivingAdjust += Math.signum(distanceError) * minPower;
+                    drivingAdjust = Math.max(Math.min(drivingAdjust, 0.4), -0.4);
 
+                    // limita a potência
                     drivingAdjust = Math.max(Math.min(drivingAdjust, 0.4), -0.4);
 
                     if (Math.abs(distanceError) < 3) { // chegou perto

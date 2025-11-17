@@ -7,29 +7,33 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.IMU;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
-@TeleOp(name = "AlinharSuaveComLimelight", group = "Linear OpMode")
+@TeleOp(name = "Rotacionador", group = "Linear OpMode")
 public class Rotacionador extends LinearOpMode {
 
-    private DcMotor frontLeftDrive, backLeftDrive, frontRightDrive, backRightDrive;
+    private DcMotor frontLeftDrive = null;
+    private DcMotor backLeftDrive = null;
+    private DcMotor frontRightDrive = null;
+    private DcMotor backRightDrive = null;
+
     private Limelight3A limelight;
     private IMU imu;
 
     @Override
     public void runOpMode() {
-        // Motores
+        // Inicializa motores
         frontLeftDrive = hardwareMap.get(DcMotor.class, "frontLeftDrive");
         backLeftDrive = hardwareMap.get(DcMotor.class, "backLeftDrive");
         frontRightDrive = hardwareMap.get(DcMotor.class, "frontRightDrive");
         backRightDrive = hardwareMap.get(DcMotor.class, "backRightDrive");
 
+        // Direções dos motores
         frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);
 
-        // Limelight + IMU
+        // Limelight e IMU
         limelight = hardwareMap.get(Limelight3A.class, "Limelight");
         imu = hardwareMap.get(IMU.class, "imu");
 
@@ -45,34 +49,29 @@ public class Rotacionador extends LinearOpMode {
         telemetry.update();
 
         waitForStart();
+
         limelight.start();
 
         while (opModeIsActive()) {
             LLResult result = limelight.getLatestResult();
 
             if (result != null && result.isValid()) {
-                double tx = result.getTx(); // erro horizontal em graus
+                double tx = result.getTx(); // deslocamento horizontal (em graus)
 
-                // zona morta e controle suavizado
-                double deadband = 0.8;  // tolerância em graus
-                double Kp = 0.03;       // ganho base
-                double Ke = 0.05;       // taxa de suavização exponencial
-
+                // Controle proporcional simples
+                double Kp = 0.035; // ajuste o ganho conforme necessário
                 double error = tx;
-                double absError = Math.abs(error);
+                double turnPower = Kp * error;
 
-                // aplica uma desaceleração exponencial conforme o erro diminui
-                double turnPower = Kp * error * Math.exp(-Ke * absError);
+                // Limita a potência para evitar sobrecorreções
+                turnPower = Math.max(Math.min(turnPower, 0.3), -0.3);
 
-                // limita potência máxima
-                turnPower = Math.max(Math.min(turnPower, 0.25), -0.25);
-
-                // aplica zona morta
-                if (absError < deadband) {
+                // Se o erro for pequeno, para o robô
+                if (Math.abs(error) < 1.0) {
                     turnPower = 0;
                 }
 
-                // define potência para girar suavemente
+                // Define potência oposta nos lados para girar
                 frontLeftDrive.setPower(turnPower);
                 backLeftDrive.setPower(turnPower);
                 frontRightDrive.setPower(-turnPower);
@@ -82,7 +81,7 @@ public class Rotacionador extends LinearOpMode {
                 telemetry.addData("Potência de giro", turnPower);
                 telemetry.update();
             } else {
-                // sem alvo — para tudo
+                // Se não há alvo detectado, para os motores
                 frontLeftDrive.setPower(0);
                 backLeftDrive.setPower(0);
                 frontRightDrive.setPower(0);
