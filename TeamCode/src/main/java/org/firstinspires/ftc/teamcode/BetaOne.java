@@ -213,14 +213,11 @@ public class BetaOne extends LinearOpMode {
                         intake1.setPower(0);
                         intake2.setPower(0);
                         intake3.setPower(0);
-                    }{
-                    intake1.setPower(0);
-                    intake2.setPower(0);
-                    intake3.setPower(0);
+                    }
                 }
             telemetry.addData("Distance", distance);
             telemetry.addData("Motor", motor);
             telemetry.update();
             }
         }
-    }
+
