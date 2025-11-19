@@ -7,12 +7,12 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
-@TeleOp(name="betaOne", group="Linear OpMode")
-public class  betaOne extends LinearOpMode {
+@TeleOp(name="BetaOne", group="Linear OpMode")
+public class BetaOne extends LinearOpMode {
 
 /*CONTROLES:
   Joystick = move o robô
@@ -28,7 +28,7 @@ public class  betaOne extends LinearOpMode {
 
     private DcMotor intake1, intake2, shooter;
 
-    private Servo intake3;
+    private CRServo intake3;
 
     boolean j = false;
 
@@ -55,24 +55,15 @@ public class  betaOne extends LinearOpMode {
         intake2 = hardwareMap.get(DcMotor.class, "intake2");
         shooter = hardwareMap.get(DcMotor.class, "shooter");
 
-        double i = 0;
-
-        intake3 = hardwareMap.get(Servo.class, "intake3");
+        intake3 = hardwareMap.get(CRServo.class, "intake3");
 
         shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        frontRight.setDirection(DcMotor.Direction.REVERSE);
-        backRight.setDirection(DcMotor.Direction.REVERSE);
-
-        frontLeft.setPower(0);
-        frontRight.setPower(0);
-        backLeft.setPower(0);
-        backRight.setPower(0);
-        intake1.setPower(0);
-        shooter.setPower(0);
-
-        intake3.setPosition(0.5);
+        backLeft.setDirection(DcMotor.Direction.REVERSE);
+        frontLeft.setDirection(DcMotor.Direction.REVERSE);
+        backRight.setDirection(DcMotor.Direction.FORWARD);
+        frontRight.setDirection(DcMotor.Direction.FORWARD);
 
         limelight = hardwareMap.get(Limelight3A.class, "Limelight");
         imu = hardwareMap.get(IMU.class, "imu");
@@ -144,9 +135,9 @@ public class  betaOne extends LinearOpMode {
 
             double limelightMountAngleDegrees = 0.0;
 
-            double limelightLensHeightInches = 5/2.54;
+            double limelightLensHeightInches = 27.5/2.54;
 
-            double goalHeightInches = 25/2.54;
+            double goalHeightInches = 74/2.54;
 
             double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
             double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
@@ -192,35 +183,32 @@ public class  betaOne extends LinearOpMode {
             }
 
             //CODIGO ALTERNADOR ENTRE INTAKES E SHOOTER
-            if (gamepad1.left_bumper && !j) {
-                i = i+1;
-            }
-            if ((i != 0) && (i % 2 == 1)) {
+            if (gamepad1.left_bumper) {
                 intake1.setPower(-1.0);
                 intake2.setPower(-1.0);
-                shooter.setPower(0);
+
             } else {
-                shooter.setPower(-1.0);
+
                 intake1.setPower(0);
                 intake2.setPower(0);
             }
 
+            if (gamepad1.a) {
+                shooter.setPower(-1.0);
+            } else {
+                shooter.setPower(0);
+            }
                 //CODIGO ATIRADOR DO SHOOTER
-                if (gamepad1.right_bumper && !running) {
-                    running = true;
-                    timer.reset();
-                }
-                if (running && timer.seconds() < 8) {
+                if (gamepad1.right_bumper) {
                     intake1.setPower(-1.0);
                     intake2.setPower(-1.0);
-                    intake3.setPosition(1);
-                }
-                if (running && timer.seconds() >= 8) {
-                    running = false;
+                    intake3.setPower(1);
+                } else {
                     intake1.setPower(0);
                     intake2.setPower(0);
-                    intake3.setPosition(0);
+                    intake3.setPower(0);
                 }
+                telemetry.update();
             }
         }
     }
