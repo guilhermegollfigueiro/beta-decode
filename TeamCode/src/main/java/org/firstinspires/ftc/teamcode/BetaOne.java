@@ -14,39 +14,17 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import java.util.List;
 
-
 @TeleOp(name="BetaOne", group="Linear OpMode")
 public class BetaOne extends LinearOpMode {
 
-/*CONTROLES:
-  Joystick = move o robô
-  LB = liga os intakes e desliga o shooter/ desliga os intakes e lizga o shooter
-  RB = executa a ação de atirar as duas bolinhas pegas de uma vez
-  B = rotaciona o robô em direção ao april tag
-  Y = distancia o robô para a posição em que sempre acertará (ISSO VAI DEIXAR DE EXISTIR
-  POIS SERÁ TROCADO PELO CÁLCULO DE FORÇA DO MOTOR)
-  X = diminui a força do shooter
-  Y = aumenta a força do shooter
-
-  obs programador: trocar os nomes do motores no codigo e dos intakes e shooter no driver hub
- */
     private DcMotor frontLeft, frontRight, backLeft, backRight;
-
     private DcMotor intake1, intake2;
-
     private DcMotorEx shooter;
-
     private CRServo intake3;
-
     private Limelight3A limelight;
-
     private IMU imu;
-
-    private double motor;
     private double i = 0;
-
-   private int id;
-
+    private int id;
     private double distance;
 
     @Override
@@ -60,7 +38,6 @@ public class BetaOne extends LinearOpMode {
         intake1 = hardwareMap.get(DcMotor.class, "intake1");
         intake2 = hardwareMap.get(DcMotor.class, "intake2");
         shooter = hardwareMap.get(DcMotorEx.class, "shooter");
-
         intake3 = hardwareMap.get(CRServo.class, "intake3");
 
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -84,8 +61,8 @@ public class BetaOne extends LinearOpMode {
         imu = hardwareMap.get(IMU.class, "imu");
 
         RevHubOrientationOnRobot orientation = new RevHubOrientationOnRobot(
-        RevHubOrientationOnRobot.LogoFacingDirection.UP,
-        RevHubOrientationOnRobot.UsbFacingDirection.FORWARD);
+                RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD);
         imu.initialize(new IMU.Parameters(orientation));
 
         double tx = 0;
@@ -101,6 +78,7 @@ public class BetaOne extends LinearOpMode {
         limelight.start();
 
         while (opModeIsActive()) {
+
             LLResult result = limelight.getLatestResult();
 
             double y = -gamepad1.left_stick_y;
@@ -115,7 +93,7 @@ public class BetaOne extends LinearOpMode {
             double max = Math.max(Math.abs(frontLeftPower),
                     Math.max(Math.abs(backLeftPower),
                             Math.max(Math.abs(frontRightPower), Math.abs(backRightPower))));
-            if (max > 1.0) {
+            if (max > 0.8) {
                 frontLeftPower /= max;
                 backLeftPower /= max;
                 frontRightPower /= max;
@@ -137,62 +115,70 @@ public class BetaOne extends LinearOpMode {
                 tx = result.getTx();
                 targetOffsetAngle_Vertical = result.getTy();
             }
-                //ROTACIONADOR AUTOMATICO LIMELIGHT3A
-                if (result != null && result.isValid() && (gamepad1.right_trigger > 0.5)) {
 
+            // ROTACIONADOR AUTOMATICO LIMELIGHT3A
+            if (result != null && result.isValid() && (gamepad1.right_trigger > 0.5)) {
 
-                    double Kp = 0.035;
-                    double error = tx;
-                    double turnPower = Kp * error;
+                double Kp = 0.035;
+                double error = tx;
+                double turnPower = Kp * error;
 
-                    turnPower = Math.max(Math.min(turnPower, 0.3), -0.3);
-                    if (Math.abs(error) < 1.0) {
-                        turnPower = 0;
-                    }
-
-
-                    frontLeft.setPower(turnPower);
-                    backLeft.setPower(turnPower);
-                    frontRight.setPower(-turnPower);
-                    backRight.setPower(-turnPower);
-                } else {
-                    frontLeft.setPower(frontLeftPower);
-                    backLeft.setPower(backLeftPower);
-                    frontRight.setPower(frontRightPower);
-                    backRight.setPower(backRightPower);
+                turnPower = Math.max(Math.min(turnPower, 0.3), -0.3);
+                if (Math.abs(error) < 1.0) {
+                    turnPower = 0;
                 }
 
-            //CORRETOR DE DISTANCIA LIMELIGHT3A
+                double p = 0.6;
 
+                if (id == 20 || id == 24) {
+                    if (gamepad1.right_trigger > 0.3) {
+                        if (result != null) {
+                            frontLeft.setPower(turnPower);
+                            backLeft.setPower(turnPower);
+                            frontRight.setPower(-turnPower);
+                            backRight.setPower(-turnPower);
+                        } else {
+                            frontLeft.setPower(-p);
+                            backLeft.setPower(-p);
+                            frontRight.setPower(p);
+                            backRight.setPower(p);
+                        }
+                    } else if (gamepad1.left_trigger > 0.3) {
+                        if (result != null) {
+                            frontLeft.setPower(turnPower);
+                            backLeft.setPower(turnPower);
+                            frontRight.setPower(-turnPower);
+                            backRight.setPower(-turnPower);
+                        } else {
+                            frontLeft.setPower(p);
+                            backLeft.setPower(p);
+                            frontRight.setPower(-p);
+                            backRight.setPower(-p);
+                        }
+                    }
+                }
+            }
+
+            // CALCULADOR DE DISTANCIA LIMELIGHT3A
             double limelightMountAngleDegrees = 0.0;
-
-            double limelightLensHeightInches = 27.5/2.54;
-
-            double goalHeightInches = 74/2.54;
+            double limelightLensHeightInches = 27.5 / 2.54;
+            double goalHeightInches = 74 / 2.54;
 
             double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
             double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
 
-            //calculate distance
             distance = (goalHeightInches - limelightLensHeightInches) / Math.tan(angleToGoalRadians) * 2.54;
 
             double KpDistance = -0.1;
             double desiredDistance = 100.0;
-
             double currentDistance = distance;
 
-            double velocity = shooter.getVelocity(); // ticks/segundo
-
-            double percentSpeed = velocity / maxTicksPerSecond;
-
-            motor = Math.max(-1.0, Math.min(1.0, percentSpeed));
-
             if (gamepad1.x) {
-                i = i + 0.01;
+                i = i + 0.001;
             }
 
             if (gamepad1.b) {
-                i = i - 0.01;
+                i = i - 0.001;
             }
 
             if (gamepad1.a) {
@@ -200,24 +186,25 @@ public class BetaOne extends LinearOpMode {
             } else {
                 shooter.setPower(0);
             }
-                //CODIGO ATIRADOR DO SHOOTER
-                if (gamepad1.right_bumper) {
-                    intake1.setPower(-1.0);
-                    intake2.setPower(-1.0);
-                    intake3.setPower(1);
-                } else if (gamepad1.left_bumper) {
-                        intake1.setPower(-1.0);
-                        intake2.setPower(-1.0);
-                        intake3.setPower(-1);
-                    } else {
-                        intake1.setPower(0);
-                        intake2.setPower(0);
-                        intake3.setPower(0);
-                    }
-                }
-            telemetry.addData("Distance", distance);
-            telemetry.addData("Motor", motor);
-            telemetry.update();
-            }
-        }
 
+            // CODIGO ATIRADOR DO SHOOTER
+            if (gamepad1.right_bumper) {
+                intake1.setPower(-1.0);
+                intake2.setPower(-1.0);
+                intake3.setPower(1);
+            } else if (gamepad1.left_bumper) {
+                intake1.setPower(-1.0);
+                intake2.setPower(-1.0);
+                intake3.setPower(-1);
+            } else {
+                intake1.setPower(0);
+                intake2.setPower(0);
+                intake3.setPower(0);
+            }
+
+            telemetry.addData("Distance", distance);
+            telemetry.addData("Motor Controle", i);
+            telemetry.update();
+        }
+    }
+}

@@ -90,13 +90,12 @@ public class BetaTwo extends LinearOpMode {
                 intake2.setPower(-1.0);
 
             } else {
-
                 intake1.setPower(0);
                 intake2.setPower(0);
             }
 
             if (gamepad1.right_bumper) {
-                shooter.setPower(-1.0);
+                shooter.setPower(-0.9);
             } else {
                 shooter.setPower(0);
             }
