@@ -6,55 +6,56 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import java.util.List;
 
-@TeleOp(name="BetaOne", group="Linear OpMode")
-public class BetaOne extends LinearOpMode {
+@TeleOp(name="Calibrador", group="Linear OpMode")
+public class Calibrador extends LinearOpMode {
 
-    private DcMotorEx frontLeft, frontRight, backLeft, backRight;
-    private DcMotorEx intake1, intake2;
+    private DcMotor frontLeft, frontRight, backLeft, backRight;
+    private DcMotor intake1, intake2;
     private DcMotorEx shooter;
     private CRServo intake3;
     private Limelight3A limelight;
     private IMU imu;
     private double i = -0.8;
-    private double Lasttx;
     private int id;
     private double distance;
 
     @Override
     public void runOpMode() {
 
-        frontLeft = hardwareMap.get(DcMotorEx.class, "front_left_motor");
-        frontRight = hardwareMap.get(DcMotorEx.class, "front_right_motor");
-        backLeft = hardwareMap.get(DcMotorEx.class, "back_left_motor");
-        backRight = hardwareMap.get(DcMotorEx.class, "back_right_motor");
+        frontLeft = hardwareMap.get(DcMotor.class, "front_left_motor");
+        frontRight = hardwareMap.get(DcMotor.class, "front_right_motor");
+        backLeft = hardwareMap.get(DcMotor.class, "back_left_motor");
+        backRight = hardwareMap.get(DcMotor.class, "back_right_motor");
 
-        intake1 = hardwareMap.get(DcMotorEx.class, "intake1");
-        intake2 = hardwareMap.get(DcMotorEx.class, "intake2");
+        intake1 = hardwareMap.get(DcMotor.class, "intake1");
+        intake2 = hardwareMap.get(DcMotor.class, "intake2");
         shooter = hardwareMap.get(DcMotorEx.class, "shooter");
         intake3 = hardwareMap.get(CRServo.class, "intake3");
 
-        shooter.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        shooter.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        frontLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        frontRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        backLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        backRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        frontLeft.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        frontRight.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        backLeft.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        backRight.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        backLeft.setDirection(DcMotorEx.Direction.REVERSE);
-        frontLeft.setDirection(DcMotorEx.Direction.REVERSE);
-        backRight.setDirection(DcMotorEx.Direction.FORWARD);
-        frontRight.setDirection(DcMotorEx.Direction.FORWARD);
+        backLeft.setDirection(DcMotor.Direction.REVERSE);
+        frontLeft.setDirection(DcMotor.Direction.REVERSE);
+        backRight.setDirection(DcMotor.Direction.FORWARD);
+        frontRight.setDirection(DcMotor.Direction.FORWARD);
 
         limelight = hardwareMap.get(Limelight3A.class, "Limelight");
         imu = hardwareMap.get(IMU.class, "imu");
@@ -114,6 +115,45 @@ public class BetaOne extends LinearOpMode {
                 targetOffsetAngle_Vertical = result.getTy();
             }
 
+            if (result != null && result.isValid() && (gamepad1.right_trigger > 0.5)) {
+
+                double Kp = 0.035;
+                double error = tx;
+                double turnPower = Kp * error;
+
+                turnPower = Math.max(Math.min(turnPower, 0.35), -0.35);
+                if (Math.abs(error) < 0.3) {
+                    turnPower = 0;
+                }
+
+                if (gamepad1.right_trigger > 0.1) {
+                    if (result != null && result.isValid() && (id == 20 || id == 24)) {
+                        frontLeft.setPower(turnPower);
+                        backLeft.setPower(turnPower);
+                        frontRight.setPower(-turnPower);
+                        backRight.setPower(-turnPower);
+                    } else if (gamepad1.right_trigger > 0.1) {
+                        frontLeft.setPower(-0.6);
+                        backLeft.setPower(-0.6);
+                        frontRight.setPower(0.6);
+                        backRight.setPower(0.6);
+                    }
+                } else if (gamepad1.left_trigger > 0.1) {
+                    if (result != null && result.isValid() && (id == 20 || id == 24)) {
+                        frontLeft.setPower(turnPower);
+                        backLeft.setPower(turnPower);
+                        frontRight.setPower(-turnPower);
+                        backRight.setPower(-turnPower);
+                    } else if (gamepad1.left_trigger > 0.1) {
+                        frontLeft.setPower(0.6);
+                        backLeft.setPower(0.6);
+                        frontRight.setPower(-0.6);
+                        backRight.setPower(-0.6);
+                    }
+                }
+
+            }
+
             double limelightMountAngleDegrees = 0.0;
             double limelightLensHeightInches = 27.5 / 2.54;
             double goalHeightInches = 75 / 2.54;
@@ -125,60 +165,24 @@ public class BetaOne extends LinearOpMode {
 
             double currentDistance = distance;
 
-            double Kp = 0.035;
-            double error = tx;
-            double turnPower = Kp * error;
-
-            turnPower = Math.max(Math.min(turnPower, 0.35), -0.35);
-            if (Math.abs(error) < 0.15) {
-                turnPower = 0;
+            if (gamepad1.x) {
+                i = i + 0.00001;
             }
 
-            if (gamepad1.right_trigger > 0.3 || gamepad1.left_trigger > 0.3) {
-
-                if (gamepad1.right_trigger > 0.3 && Lasttx != distance && (id == 20 || id == 24)) {
-                    frontLeft.setPower(turnPower);
-                    backLeft.setPower(turnPower);
-                    frontRight.setPower(-turnPower);
-                    backRight.setPower(-turnPower);
-
-                } else {
-                    frontLeft.setPower(-0.6);
-                    backLeft.setPower(-0.6);
-                    frontRight.setPower(0.6);
-                    backRight.setPower(0.6);
-                }
-
-            } else {
-
-                if (gamepad1.left_trigger > 0.3 && Lasttx != distance && (id == 20 || id == 24)) {
-                    frontLeft.setPower(turnPower);
-                    backLeft.setPower(turnPower);
-                    frontRight.setPower(-turnPower);
-                    backRight.setPower(-turnPower);
-
-                } else {
-                    frontLeft.setPower(0.6);
-                    backLeft.setPower(0.6);
-                    frontRight.setPower(-0.6);
-                    backRight.setPower(-0.6);
-                }
+            if (gamepad1.b) {
+                i = i - 0.00001;
             }
 
-            Lasttx = tx;
+            boolean shooterOn = false; //
 
-            double i = -0.0007666564 * distance - 0.6877464;
-            i = Math.max(0, Math.min(1, i));
-
-            boolean shooterOn = false;
-
-            if (gamepad1.right_bumper) {
+            if (gamepad1.a) {
                 shooter.setPower(i);
             } else {
                 shooter.setPower(0);
             }
 
-            if (gamepad1.a) {
+            if (gamepad1.right_bumper) {
+                intake1.setPower(-1.0);
                 intake2.setPower(-1.0);
                 intake3.setPower(1.0);
             } else if (gamepad1.left_bumper) {
@@ -194,6 +198,7 @@ public class BetaOne extends LinearOpMode {
             telemetry.addData("Distance", distance);
             telemetry.addData("Motor Controle", i);
             telemetry.update();
+
         }
     }
 }

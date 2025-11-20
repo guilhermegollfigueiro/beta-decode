@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 public class Autonomo extends LinearOpMode {
     private DcMotor frontLeft, frontRight, backLeft, backRight;
 
-    private double i = 0.6;
+    private double i = 0.35;
 
     @Override
     public void runOpMode() {
