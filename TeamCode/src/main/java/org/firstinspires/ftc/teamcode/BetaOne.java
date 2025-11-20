@@ -123,16 +123,15 @@ public class BetaOne extends LinearOpMode {
                 double error = tx;
                 double turnPower = Kp * error;
 
-                turnPower = Math.max(Math.min(turnPower, 0.3), -0.3);
-                if (Math.abs(error) < 1.0) {
+                turnPower = Math.max(Math.min(turnPower, 0.35), -0.35);
+                if (Math.abs(error) < 0.3) {
                     turnPower = 0;
                 }
 
                 double p = 0.6;
 
-                if (id == 20 || id == 24) {
                     if (gamepad1.right_trigger > 0.3) {
-                        if (result != null) {
+                        if (result != null && (id == 20 || id == 24)) {
                             frontLeft.setPower(turnPower);
                             backLeft.setPower(turnPower);
                             frontRight.setPower(-turnPower);
@@ -144,7 +143,7 @@ public class BetaOne extends LinearOpMode {
                             backRight.setPower(p);
                         }
                     } else if (gamepad1.left_trigger > 0.3) {
-                        if (result != null) {
+                        if (result != null && (id == 20 || id == 24)) {
                             frontLeft.setPower(turnPower);
                             backLeft.setPower(turnPower);
                             frontRight.setPower(-turnPower);
@@ -157,7 +156,7 @@ public class BetaOne extends LinearOpMode {
                         }
                     }
                 }
-            }
+
 
             // CALCULADOR DE DISTANCIA LIMELIGHT3A
             double limelightMountAngleDegrees = 0.0;
