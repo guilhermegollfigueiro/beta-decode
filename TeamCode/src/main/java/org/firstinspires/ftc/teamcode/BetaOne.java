@@ -23,9 +23,8 @@ public class BetaOne extends LinearOpMode {
     private CRServo intake3;
     private Limelight3A limelight;
     private IMU imu;
-    private double i = -0.75;
+    private double i = -0.8;
     private int id;
-    private double p = 0.6;
     private double distance;
 
     @Override
@@ -123,39 +122,37 @@ public class BetaOne extends LinearOpMode {
                 double turnPower = Kp * error;
 
                 turnPower = Math.max(Math.min(turnPower, 0.35), -0.35);
-                if (Math.abs(error) < 0.6) {
+                if (Math.abs(error) < 0.3) {
                     turnPower = 0;
                 }
 
-                double p = 0.6;
-
-                if (gamepad1.right_trigger > 0.3) {
+                if (gamepad1.right_trigger > 0.1) {
                     if (result != null && result.isValid() && (id == 20 || id == 24)) {
                         frontLeft.setPower(turnPower);
                         backLeft.setPower(turnPower);
                         frontRight.setPower(-turnPower);
                         backRight.setPower(-turnPower);
-                    } else if (gamepad1.right_trigger > 0.3) {
-                        frontLeft.setPower(-p);
-                        backLeft.setPower(-p);
-                        frontRight.setPower(p);
-                        backRight.setPower(p);
+                    } else if (gamepad1.right_trigger > 0.1) {
+                        frontLeft.setPower(-0.6);
+                        backLeft.setPower(-0.6);
+                        frontRight.setPower(0.6);
+                        backRight.setPower(0.6);
                     }
-                } else if (gamepad1.left_trigger > 0.3) {
+                } else if (gamepad1.left_trigger > 0.1) {
                     if (result != null && result.isValid() && (id == 20 || id == 24)) {
                         frontLeft.setPower(turnPower);
                         backLeft.setPower(turnPower);
                         frontRight.setPower(-turnPower);
                         backRight.setPower(-turnPower);
-                    } else if (gamepad1.left_trigger > 0.3) {
-                        frontLeft.setPower(p);
-                        backLeft.setPower(p);
-                        frontRight.setPower(-p);
-                        backRight.setPower(-p);
+                    } else if (gamepad1.left_trigger > 0.1) {
+                        frontLeft.setPower(0.6);
+                        backLeft.setPower(0.6);
+                        frontRight.setPower(-0.6);
+                        backRight.setPower(-0.6);
                     }
                 }
 
-            } // Fecha o if de giro
+            }
 
             double limelightMountAngleDegrees = 0.0;
             double limelightLensHeightInches = 27 / 2.54;
@@ -176,20 +173,26 @@ public class BetaOne extends LinearOpMode {
                 i = i - 0.00001;
             }
 
-            if (gamepad1.a) {
+            boolean shooterOn = false; //
+
+            if (gamepad1.rightBumperWasPressed()) {
+                shooterOn = !shooterOn;
+            }
+
+            if (shooterOn) {
                 shooter.setPower(i);
             } else {
                 shooter.setPower(0);
             }
 
-            if (gamepad1.right_bumper) {
+            if (gamepad1.a) {
                 intake1.setPower(-1.0);
                 intake2.setPower(-1.0);
-                intake3.setPower(1);
+                intake2.setPower(1.0);
             } else if (gamepad1.left_bumper) {
                 intake1.setPower(-1.0);
                 intake2.setPower(-1.0);
-                intake3.setPower(-1);
+                intake2.setPower(-1.0);
             } else {
                 intake1.setPower(0);
                 intake2.setPower(0);
