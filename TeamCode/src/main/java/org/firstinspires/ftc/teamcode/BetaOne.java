@@ -136,7 +136,7 @@ public class BetaOne extends LinearOpMode {
 
             if (gamepad1.right_trigger > 0.3 || gamepad1.left_trigger > 0.3) {
 
-                if (gamepad1.right_trigger > 0.3 && Lasttx != distance && (id == 20 || id == 24)) {
+                if (gamepad1.right_trigger > 0.3 && Lasttx != tx && (id == 20 || id == 24)) {
                     frontLeft.setPower(turnPower);
                     backLeft.setPower(turnPower);
                     frontRight.setPower(-turnPower);
@@ -151,7 +151,7 @@ public class BetaOne extends LinearOpMode {
 
             } else {
 
-                if (gamepad1.left_trigger > 0.3 && Lasttx != distance && (id == 20 || id == 24)) {
+                if (gamepad1.left_trigger > 0.3 && Lasttx != tx && (id == 20 || id == 24)) {
                     frontLeft.setPower(turnPower);
                     backLeft.setPower(turnPower);
                     frontRight.setPower(-turnPower);
