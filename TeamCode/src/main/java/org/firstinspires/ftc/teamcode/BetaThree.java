@@ -14,8 +14,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import java.util.List;
 
-@TeleOp(name="BetaOne", group="Linear OpMode")
-public class BetaOne extends LinearOpMode {
+@TeleOp(name="BetaThree", group="Linear OpMode")
+public class BetaThree extends LinearOpMode {
 
     private DcMotor frontLeft, frontRight, backLeft, backRight;
     private DcMotor intake1, intake2;
@@ -189,7 +189,6 @@ public class BetaOne extends LinearOpMode {
             } else if (gamepad1.left_bumper) {
                 intake1.setPower(-1.0);
                 intake2.setPower(-1.0);
-                intake3.setPower(-1);
             } else {
                 intake1.setPower(0);
                 intake2.setPower(0);
