@@ -174,11 +174,11 @@ public class BetaOne extends LinearOpMode {
             double currentDistance = distance;
 
             if (gamepad1.x) {
-                i = i + 0.001;
+                i = i + 0.0001;
             }
 
             if (gamepad1.b) {
-                i = i - 0.001;
+                i = i - 0.0001;
             }
 
             if (gamepad1.a) {
