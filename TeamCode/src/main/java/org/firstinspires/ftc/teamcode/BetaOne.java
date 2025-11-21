@@ -9,6 +9,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import java.util.List;
 
@@ -21,14 +24,16 @@ public class BetaOne extends LinearOpMode {
     private CRServo intake3;
     private Limelight3A limelight;
     private IMU imu;
-    private double i = -0.8;
+    private double i;
     private double Lasttx;
     private int id;
     private double distance;
 
+
+
     @Override
     public void runOpMode() {
-
+        IMUbeta bench = new IMUbeta();
         frontLeft = hardwareMap.get(DcMotorEx.class, "front_left_motor");
         frontRight = hardwareMap.get(DcMotorEx.class, "front_right_motor");
         backLeft = hardwareMap.get(DcMotorEx.class, "back_left_motor");
@@ -57,24 +62,22 @@ public class BetaOne extends LinearOpMode {
         frontRight.setDirection(DcMotorEx.Direction.FORWARD);
 
         limelight = hardwareMap.get(Limelight3A.class, "Limelight");
-        imu = hardwareMap.get(IMU.class, "imu");
-
-        RevHubOrientationOnRobot orientation = new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD);
-        imu.initialize(new IMU.Parameters(orientation));
 
         double tx = 0;
         double targetOffsetAngle_Vertical = 0;
 
         limelight.pipelineSwitch(0);
+        bench.init(hardwareMap);
 
         waitForStart();
 
         limelight.setPollRateHz(100);
         limelight.start();
 
+
         while (opModeIsActive()) {
+
+            telemetry.addData("Rotação", bench.getHeading(AngleUnit.DEGREES));
 
             LLResult result = limelight.getLatestResult();
 
@@ -109,13 +112,13 @@ public class BetaOne extends LinearOpMode {
                 id = fiducial.getFiducialId();
             }
 
-            if (id == 20 || id == 24) {
+            if (id == 24) {
                 tx = result.getTx();
                 targetOffsetAngle_Vertical = result.getTy();
             }
 
             double limelightMountAngleDegrees = 0.0;
-            double limelightLensHeightInches = 27.5 / 2.54;
+            double limelightLensHeightInches = 23.98 / 2.54;
             double goalHeightInches = 75 / 2.54;
 
             double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
@@ -123,54 +126,48 @@ public class BetaOne extends LinearOpMode {
 
             distance = (goalHeightInches - limelightLensHeightInches) / Math.tan(angleToGoalRadians) * 2.54;
 
-            double currentDistance = distance;
-
-            double Kp = 0.035;
+            double Kp = 0.03;
             double error = tx;
             double turnPower = Kp * error;
 
-            turnPower = Math.max(Math.min(turnPower, 0.35), -0.35);
-            if (Math.abs(error) < 0.15) {
+            turnPower = Math.max(Math.min(turnPower, 0.225 ), -0.225);
+            if (Math.abs(error) < 0.2) {
                 turnPower = 0;
             }
 
-            if (gamepad1.right_trigger > 0.3 || gamepad1.left_trigger > 0.3) {
+            if (gamepad1.left_trigger > 0.3) {
 
-                if (gamepad1.right_trigger > 0.3 && Lasttx != tx && (id == 20 || id == 24)) {
+
+                    if (Math.abs(tx) > 0.01 && (id == 20 || id == 24)) {
+                        frontLeft.setPower(turnPower);
+                        backLeft.setPower(turnPower);
+                        frontRight.setPower(-turnPower);
+                        backRight.setPower(-turnPower);
+                    } else {
+                        frontLeft.setPower(-0.4);
+                        backLeft.setPower(-0.4);
+                        frontRight.setPower(0.4);
+                        backRight.setPower(0.4);
+                    }
+
+
+            } else if (gamepad1.right_trigger > 0.3){
+
+                if (Math.abs(tx) > 0.01 && (id == 20 || id == 24)) {
                     frontLeft.setPower(turnPower);
                     backLeft.setPower(turnPower);
                     frontRight.setPower(-turnPower);
                     backRight.setPower(-turnPower);
 
                 } else {
-                    frontLeft.setPower(-0.6);
-                    backLeft.setPower(-0.6);
-                    frontRight.setPower(0.6);
-                    backRight.setPower(0.6);
-                }
-
-            } else {
-
-                if (gamepad1.left_trigger > 0.3 && Lasttx != tx && (id == 20 || id == 24)) {
-                    frontLeft.setPower(turnPower);
-                    backLeft.setPower(turnPower);
-                    frontRight.setPower(-turnPower);
-                    backRight.setPower(-turnPower);
-
-                } else {
-                    frontLeft.setPower(0.6);
-                    backLeft.setPower(0.6);
-                    frontRight.setPower(-0.6);
-                    backRight.setPower(-0.6);
+                    frontLeft.setPower(0.4);
+                    backLeft.setPower(0.4);
+                    frontRight.setPower(-0.4);
+                    backRight.setPower(-0.4);
                 }
             }
 
-            Lasttx = tx;
-
-            double i = -0.0007666564 * distance - 0.6877464;
-            i = Math.max(0, Math.min(1, i));
-
-            boolean shooterOn = false;
+            i = -0.8;
 
             if (gamepad1.right_bumper) {
                 shooter.setPower(i);
@@ -179,12 +176,13 @@ public class BetaOne extends LinearOpMode {
             }
 
             if (gamepad1.a) {
-                intake2.setPower(-1.0);
                 intake3.setPower(1.0);
             } else if (gamepad1.left_bumper) {
                 intake1.setPower(-1.0);
                 intake2.setPower(-1.0);
+            } else if (gamepad1.x) {
                 intake3.setPower(-1.0);
+                shooter.setPower(1.0);
             } else {
                 intake1.setPower(0);
                 intake2.setPower(0);
