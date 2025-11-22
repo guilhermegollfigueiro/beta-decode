@@ -45,12 +45,12 @@ public class AUTONOMO_PARA_SABADO extends LinearOpMode {
 
         while(opModeIsActive()) {
 
-            frontLeft.setPower(0.5);
-            backLeft.setPower(0.5);
-            frontRight.setPower(0.5); //VAI PARA FREMTE
-            backRight.setPower(0.5);
+            frontLeft.setPower(0.4);
+            backLeft.setPower(0.4);
+            frontRight.setPower(0.4); //VAI PARA FREMTE
+            backRight.setPower(0.4);
 
-            sleep(1500);
+            sleep(400);
             telemetry.addData("Status", "Farma aura aí garoto boa sorte");
             telemetry.update();
         }
