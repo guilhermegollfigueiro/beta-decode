@@ -33,7 +33,6 @@ public class BetaOne extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        IMUbeta bench = new IMUbeta();
         frontLeft = hardwareMap.get(DcMotorEx.class, "front_left_motor");
         frontRight = hardwareMap.get(DcMotorEx.class, "front_right_motor");
         backLeft = hardwareMap.get(DcMotorEx.class, "back_left_motor");
@@ -67,7 +66,6 @@ public class BetaOne extends LinearOpMode {
         double targetOffsetAngle_Vertical = 0;
 
         limelight.pipelineSwitch(0);
-        bench.init(hardwareMap);
 
         waitForStart();
 
@@ -76,8 +74,6 @@ public class BetaOne extends LinearOpMode {
 
 
         while (opModeIsActive()) {
-
-            telemetry.addData("Rotação", bench.getHeading(AngleUnit.DEGREES));
 
             LLResult result = limelight.getLatestResult();
 
@@ -126,44 +122,35 @@ public class BetaOne extends LinearOpMode {
 
             distance = (goalHeightInches - limelightLensHeightInches) / Math.tan(angleToGoalRadians) * 2.54;
 
-            double Kp = 0.03;
+            double Kp = 0.5;
             double error = tx;
             double turnPower = Kp * error;
 
-            turnPower = Math.max(Math.min(turnPower, 0.225 ), -0.225);
+            turnPower = Math.max(Math.min(turnPower, 0.2 ), -0.2);
             if (Math.abs(error) < 0.2) {
                 turnPower = 0;
             }
 
-            if (gamepad1.left_trigger > 0.3) {
+            if (frontLeftPower != 0 &&
+             backLeftPower != 0 &&
+             frontRightPower != 0 &&
+             backRightPower != 0) {
 
-
-                    if (Math.abs(tx) > 0.01 && (id == 20 || id == 24)) {
+                    if (tx > 0.2 && (id == 20 || id == 24)) {
+                        frontLeft.setPower(turnPower);
+                        backLeft.setPower(turnPower);
+                        frontRight.setPower(-turnPower);
+                        backRight.setPower(-turnPower);
+                    } else if (tx < -0.2 && (id == 20 || id == 24)) {
                         frontLeft.setPower(turnPower);
                         backLeft.setPower(turnPower);
                         frontRight.setPower(-turnPower);
                         backRight.setPower(-turnPower);
                     } else {
-                        frontLeft.setPower(-0.4);
-                        backLeft.setPower(-0.4);
-                        frontRight.setPower(0.4);
-                        backRight.setPower(0.4);
-                    }
-
-
-            } else if (gamepad1.right_trigger > 0.3){
-
-                if (Math.abs(tx) > 0.01 && (id == 20 || id == 24)) {
-                    frontLeft.setPower(turnPower);
-                    backLeft.setPower(turnPower);
-                    frontRight.setPower(-turnPower);
-                    backRight.setPower(-turnPower);
-
-                } else {
-                    frontLeft.setPower(0.4);
-                    backLeft.setPower(0.4);
-                    frontRight.setPower(-0.4);
-                    backRight.setPower(-0.4);
+                    frontLeft.setPower(frontLeftPower);
+                    backLeft.setPower(backLeftPower);
+                    frontRight.setPower(frontRightPower);
+                    backRight.setPower(backRightPower);
                 }
             }
 

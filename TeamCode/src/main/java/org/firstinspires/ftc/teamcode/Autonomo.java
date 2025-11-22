@@ -3,29 +3,36 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.internal.system.Deadline;
+
+import java.util.concurrent.TimeUnit;
 
 @Autonomous(name = "Autonomo", group = "Linear OpMode")
 public class Autonomo extends LinearOpMode {
+
+    private IMU imu;
     private DcMotorEx frontLeft, frontRight, backLeft, backRight;
 
     private double i = 0.2;
     private double x = 0.0;
-
+    private DcMotorEx intake1, intake2;
+    private DcMotorEx shooter;
+    private double shooterforca = -0.78;
+    private CRServo intake3;
     private double g;
 
+    private double c = 0;
     private double A;
-
-    private IMU imu;
 
     @Override
     public void runOpMode() {
-
-        IMUbeta bench = new IMUbeta();
-
 
 
         frontLeft = hardwareMap.get(DcMotorEx.class, "front_left_motor");
@@ -33,218 +40,130 @@ public class Autonomo extends LinearOpMode {
         backLeft = hardwareMap.get(DcMotorEx.class, "back_left_motor");
         backRight = hardwareMap.get(DcMotorEx.class, "back_right_motor");
 
+        intake1 = hardwareMap.get(DcMotorEx.class, "intake1");
+        intake2 = hardwareMap.get(DcMotorEx.class, "intake2");
+        shooter = hardwareMap.get(DcMotorEx.class, "shooter");
+        intake3 = hardwareMap.get(CRServo.class, "intake3");
 
+        shooter.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        shooter.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         frontLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         frontRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         backLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         backRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
-        frontLeft.setDirection(DcMotorEx.Direction.REVERSE);
+        frontLeft.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        frontRight.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        backLeft.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        backRight.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+
         backLeft.setDirection(DcMotorEx.Direction.REVERSE);
-        frontRight.setDirection(DcMotorEx.Direction.FORWARD);
+        frontLeft.setDirection(DcMotorEx.Direction.REVERSE);
         backRight.setDirection(DcMotorEx.Direction.FORWARD);
+        frontRight.setDirection(DcMotorEx.Direction.FORWARD);
+
+        IMU imu = hardwareMap.get(IMU.class, "imu");
+        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
+                RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                RevHubOrientationOnRobot.UsbFacingDirection.UP
+        ));
+        imu.initialize(parameters);
+
+        Deadline gamepadRateLimit = new Deadline(500,TimeUnit.MILLISECONDS);
 
         waitForStart();
 
-        bench.init(hardwareMap);
-
-        while(opModeIsActive()) {
-            g = bench.getHeading(AngleUnit.DEGREES) + 180;
-            A = 40.5 + 180;
-            double Kp = 0.02;
-            double error = A;
-            double correcao = Kp * A;
-
-            correcao = Math.max(Math.min(correcao, 0.2 ), -0.2);
-            if (Math.abs(g) < Math.abs(A) + 0.3) {
-                correcao = 0;
+        while(opModeIsActive() && x < 1) {
+            x = x + 1;
+            if (gamepadRateLimit.hasExpired() && c < 1) {
+                imu.resetYaw();
+                gamepadRateLimit.reset();
+                c = c + 1;
             }
+            ElapsedTime timer = new ElapsedTime();
 
-            //PRIMEIRAS 3 BOLINHAS DENTRO DO ROBO
-            if (g < A) {
-                frontLeft.setPower(0.5 - correcao);
-                backLeft.setPower(0.5 + correcao);
-                frontRight.setPower(0.5 + correcao); //VAI PARA FRENTE E CORRIGE NA ESQUERDA
-                backRight.setPower(0.5 - correcao);
-            } else {
-                frontLeft.setPower(0.5 + correcao);
-                backLeft.setPower(0.5 - correcao);
-                frontRight.setPower(0.5 - correcao); //VAI PARA FRENTE E CORRIGE NA ESQUERDA
-                backRight.setPower(0.5 + correcao);
+            //1 - PRIMEIRAS 2 BOLINHAS
+            timer.reset();
+            g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+            A = g;
+            while (timer.seconds() < 1.450) {
+                g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+                double Kp = 0.01;
+                double error = g - A;
+                double correcao = Kp * error;
+
+                correcao = Math.max(Math.min(correcao, 0.1), -0.1);
+                if (Math.abs(g) < Math.abs(A) + 0.30) {
+                    correcao = 0;
+                }
+                if (g < A) {
+                    frontLeft.setPower(0.4 - correcao);
+                    backLeft.setPower(0.4 - correcao);
+                    frontRight.setPower(0.4 + correcao); //VAI PARA FRENTE E CORRIGE NA ESQUERDA
+                    backRight.setPower(0.4 + correcao);
+                } else if (g > A) {
+                    frontLeft.setPower(0.4 + correcao);
+                    backLeft.setPower(0.4 + correcao);
+                    frontRight.setPower(0.4 - correcao); //VAI PARA FRENTE E CORRIGE NA DIREITA
+                    backRight.setPower(0.4 - correcao);
+                } else {
+                    frontLeft.setPower(0.4);
+                    backLeft.setPower(0.4);
+                    frontRight.setPower(0.4); //VAI PARA FRENTE
+                    backRight.setPower(0.4);
+                }
+                shooter.setPower(shooterforca);
+                telemetry.addData("A", A);
+                telemetry.addData("g", g);
+                telemetry.update();
             }
+            frontLeft.setPower(0);
+            backLeft.setPower(0);
+            frontRight.setPower(0);
+            backRight.setPower(0);
+            sleep(2000);
+
+            while (timer.seconds() > 2.5 && timer.seconds() < 8) {
+                intake1.setPower(-0.7);
+                intake2.setPower(-0.7);
+                intake3.setPower(1);
+                telemetry.addData("A", A); // ATIRA NA CESTA
+                telemetry.addData("g", g);
+                telemetry.update();
+            }
+            intake1.setPower(0);
+            intake2.setPower(0);
+            intake3.setPower(0);
+            shooter.setPower(0);
+
+            //2 - ROTACAO PARA 1 INTAKE
+            timer.reset();
+            g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+            A = -137.88;
+            while (Math.abs(g) < Math.abs(A) + 0.3) {
+                g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+                double Kp = 0.01;
+                double error = Math.abs(g - A);
+                double correcao = Kp * error;
+
+                correcao = Math.max(Math.min(correcao, 0.3), -0.3);
+                if (Math.abs(g) > Math.abs(A) - 0.30 && Math.abs(g) < Math.abs(A) + +0.30 ) {
+                    correcao = 0;
+                }
+                    frontLeft.setPower(correcao);
+                    backLeft.setPower(correcao);
+                    frontRight.setPower(-correcao); //VAI PARA FRENTE E CORRIGE NA DIREITA
+                    backRight.setPower(-correcao);
+                shooter.setPower(shooterforca);
+                telemetry.addData("A", A);
+                telemetry.addData("g", g);
+                telemetry.update();
+            }
+            frontLeft.setPower(0);
+            backLeft.setPower(0);
+            frontRight.setPower(0);
+            backRight.setPower(0);
             sleep(1000);
-
-            frontLeft.setPower(x);
-            backLeft.setPower(x);
-            frontRight.setPower(x); //VAI PARA TRAS
-            backRight.setPower(x);
-
-            sleep(500);
-
-            frontLeft.setPower(-0.5);
-            backLeft.setPower(-0.5);
-            frontRight.setPower(-0.5); //VAI PARA TRAS
-            backRight.setPower(-0.5);
-
-            sleep(1500);
-
-            //PRIMEIRAS 3 BOLINHAS DENTRO DO ROBO
-            frontLeft.setPower(-i);
-            backLeft.setPower(-i);
-            frontRight.setPower(-i); //VAI PARA TRAS
-            backRight.setPower(-i);
-
-            sleep(2800);
-
-            frontLeft.setPower(-i);
-            backLeft.setPower(-i);
-            frontRight.setPower(i); // ROTACIONA PARA ESQUERDA
-            backRight.setPower(i);
-
-            sleep(340);
-
-            frontLeft.setPower(-i);
-            backLeft.setPower(i);
-            frontRight.setPower(i); //ANDA PARA ESQUERDA
-            backRight.setPower(-i);
-
-            sleep(80);
-
-            //PRIMEIRO INTAKE 3 BOLINHAS
-            frontLeft.setPower(i);
-            backLeft.setPower(i);
-            frontRight.setPower(i); //ANDA PARA FRENTE
-            backRight.setPower(i);
-
-            sleep(1100);
-
-            frontLeft.setPower(-i);
-            backLeft.setPower(-i);
-            frontRight.setPower(-i); //ANDA PARA TRÁS
-            backRight.setPower(-i);
-
-            sleep(1100);
-
-            frontLeft.setPower(i);
-            backLeft.setPower(-i);
-            frontRight.setPower(-i);  //ANDA PARA DIREITA
-            backRight.setPower(i);
-
-            sleep(80);
-
-            frontLeft.setPower(i);
-            backLeft.setPower(i);
-            frontRight.setPower(-i); //ROTACIONA PARA DIREITA
-            backRight.setPower(-i);
-
-            sleep(340);
-
-            //SEGUNDO INTAKE 3 BOLINHAS
-            frontLeft.setPower(-i);
-            backLeft.setPower(-i);
-            frontRight.setPower(i); //ROTACIONA PARA ESQUERDA
-            backRight.setPower(i);
-
-            sleep(340);
-
-            frontLeft.setPower(-i);
-            backLeft.setPower(i);
-            frontRight.setPower(i); //ANDA PARA ESQUERDA
-            backRight.setPower(-i);
-
-            sleep(760);
-
-            frontLeft.setPower(i);
-            backLeft.setPower(i);
-            frontRight.setPower(i); //ANDA PARA FRENTE
-            backRight.setPower(i);
-
-            sleep(1100);
-
-            frontLeft.setPower(-i);
-            backLeft.setPower(-i);
-            frontRight.setPower(-i); //ANDA PARA TRÁS
-            backRight.setPower(-i);
-
-            sleep(1100);
-
-            frontLeft.setPower(i);
-            backLeft.setPower(-i);
-            frontRight.setPower(-i); //ANDA PARA DIREITA
-            backRight.setPower(i);
-
-            sleep(760);
-
-            frontLeft.setPower(i);
-            backLeft.setPower(i);
-            frontRight.setPower(-i); //ROTACIONA PARA DIREITA
-            backRight.setPower(-i);
-
-            sleep(340);
-
-            //TERCEIRO INTAKE 3 BOLINHAS
-            frontLeft.setPower(-i);
-            backLeft.setPower(-i);
-            frontRight.setPower(i); //ROTACIONA PARA ESQUERDA
-            backRight.setPower(i);
-
-            sleep(340);
-
-            frontLeft.setPower(-i);
-            backLeft.setPower(i);
-            frontRight.setPower(i); //ANDA PARA ESQUERDA
-            backRight.setPower(-i);
-
-            sleep(1470);
-
-            frontLeft.setPower(i);
-            backLeft.setPower(i);
-            frontRight.setPower(i); //ANDA PARA FRENTE
-            backRight.setPower(i);
-
-            sleep(1100);
-
-            frontLeft.setPower(-i);
-            backLeft.setPower(-i);
-            frontRight.setPower(-i); //ANDA PARA TRÁS
-            backRight.setPower(-i);
-
-            sleep(1100);
-
-            frontLeft.setPower(i);
-            backLeft.setPower(-i);
-            frontRight.setPower(-i); //ANDA PARA DIREITA
-            backRight.setPower(i);
-
-            sleep(1470);
-
-            frontLeft.setPower(i);
-            backLeft.setPower(i);
-            frontRight.setPower(-i); //ROTACIONA PARA DIREITA
-            backRight.setPower(-i);
-
-            sleep(340);
-
-            frontLeft.setPower(-i);
-            backLeft.setPower(-i);
-            frontRight.setPower(i); //ROTACIONA PARA ESQUERDA
-            backRight.setPower(i);
-
-            sleep(340);
-
-            frontLeft.setPower(i);
-            backLeft.setPower(i);
-            frontRight.setPower(i); //ANDA PARA FRENTE
-            backRight.setPower(i);
-
-            sleep(900);
-
-            frontLeft.setPower(-i);
-            backLeft.setPower(i);
-            frontRight.setPower(i); //ANDA PARA ESQUERDA
-            backRight.setPower(-i);
-
-            sleep(260);
 
             telemetry.addData("Status", "Autônomo concluído");
             telemetry.update();
