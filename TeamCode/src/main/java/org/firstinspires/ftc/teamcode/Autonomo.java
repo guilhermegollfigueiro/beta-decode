@@ -181,7 +181,7 @@ public class Autonomo extends LinearOpMode {
             timer.reset();
             g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
             A = -137.88;
-            while (timer.seconds() < 1.8) {
+            while (timer.seconds() < 2.2) {
                 g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
                 double Kp = 0.015;
                 double error = g - A;
@@ -228,7 +228,7 @@ public class Autonomo extends LinearOpMode {
             timer.reset();
             g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
             A = -137.88;
-            while (timer.seconds() < 1.8) {
+            while (timer.seconds() < 1.6) {
                 g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
                 double Kp = 0.015;
                 double error = g - A;
@@ -360,7 +360,7 @@ public class Autonomo extends LinearOpMode {
             timer.reset();
             g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
             A = -46.24;
-            while (timer.seconds() < 0.6) {
+            while (timer.seconds() < 1.05) {
                 g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
                 double Kp = 0.015;
                 double error = g - A;
@@ -372,31 +372,26 @@ public class Autonomo extends LinearOpMode {
                 }
 
                 if (g < A) {
-                    frontLeft.setPower(0.25 - correcao);
-                    backLeft.setPower(0.25 - correcao);
-                    frontRight.setPower(0.25 + correcao); //VAI PARA FRENTE E CORRIGE NA ESQUERDA
-                    backRight.setPower(0.25 + correcao);
+                    frontLeft.setPower(0.3 - correcao);
+                    backLeft.setPower(0.3 - correcao);
+                    frontRight.setPower(0.3 + correcao); //VAI PARA FRENTE E CORRIGE NA ESQUERDA
+                    backRight.setPower(0.3 + correcao);
                 } else if (g > A) {
-                    frontLeft.setPower(0.25 + correcao);
-                    backLeft.setPower(0.25 + correcao);
-                    frontRight.setPower(0.25 - correcao); //VAI PARA FRENTE E CORRIGE NA DIREITA
-                    backRight.setPower(0.25 - correcao);
+                    frontLeft.setPower(0.3 + correcao);
+                    backLeft.setPower(0.3 + correcao);
+                    frontRight.setPower(0.3 - correcao); //VAI PARA FRENTE E CORRIGE NA DIREITA
+                    backRight.setPower(0.3 - correcao);
                 } else {
-                    frontLeft.setPower(0.25);
-                    backLeft.setPower(0.25);
-                    frontRight.setPower(0.25); //VAI PARA FRENTE
-                    backRight.setPower(0.25);
+                    frontLeft.setPower(0.3);
+                    backLeft.setPower(0.3);
+                    frontRight.setPower(0.3); //VAI PARA FRENTE
+                    backRight.setPower(0.3);
                 }
-                intake1.setPower(-1);
-                intake2.setPower(-1);
                 telemetry.addData("A", A);
                 telemetry.addData("g", g);
                 telemetry.addData("correcao", correcao);
                 telemetry.update();
             }
-            intake1.setPower(0);
-            intake2.setPower(0);
-            intake3.setPower(0);
             frontLeft.setPower(0);
             backLeft.setPower(0);
             frontRight.setPower(0);
@@ -441,7 +436,229 @@ public class Autonomo extends LinearOpMode {
             backRight.setPower(0);
             sleep(200);
 
-            telemetry.addData("Status", "Autônomo concluído");
+            //9 - INTAKE 2 INDO
+            timer.reset();
+            g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+            A = -137.88;
+            while (timer.seconds() < 2.2) {
+                g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+                double Kp = 0.015;
+                double error = g - A;
+                double correcao = Math.abs(Kp * error);
+
+                correcao = Math.max(Math.min(correcao, 0.03), -0.03);
+                if (g < A + 0.3 && g > A - 0.3) {
+                    correcao = 0;
+                }
+
+                if (g < A) {
+                    frontLeft.setPower(0.25 - correcao);
+                    backLeft.setPower(0.25 - correcao);
+                    frontRight.setPower(0.25 + correcao); //VAI PARA FRENTE E CORRIGE NA ESQUERDA
+                    backRight.setPower(0.25 + correcao);
+                } else if (g > A) {
+                    frontLeft.setPower(0.25 + correcao);
+                    backLeft.setPower(0.25 + correcao);
+                    frontRight.setPower(0.25 - correcao); //VAI PARA FRENTE E CORRIGE NA DIREITA
+                    backRight.setPower(0.25 - correcao);
+                } else {
+                    frontLeft.setPower(0.25);
+                    backLeft.setPower(0.25);
+                    frontRight.setPower(0.25); //VAI PARA FRENTE
+                    backRight.setPower(0.25);
+                }
+                intake1.setPower(-1);
+                intake2.setPower(-1);
+                telemetry.addData("A", A);
+                telemetry.addData("g", g);
+                telemetry.addData("correcao", correcao);
+                telemetry.update();
+            }
+            intake1.setPower(0);
+            intake2.setPower(0);
+            intake3.setPower(0);
+            frontLeft.setPower(0);
+            backLeft.setPower(0);
+            frontRight.setPower(0);
+            backRight.setPower(0);
+            sleep(200);
+
+            //10 - INTAKE 2 VOLTANDO
+            timer.reset();
+            g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+            A = -137.88;
+            while (timer.seconds() < 1.8) {
+                g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+                double Kp = 0.015;
+                double error = g - A;
+                double correcao = Math.abs(Kp * error);
+
+                correcao = Math.max(Math.min(correcao, 0.03), -0.03);
+                if (g < A + 0.3 && g > A - 0.3) {
+                    correcao = 0;
+                }
+
+                if (g < A) {
+                    frontLeft.setPower(-0.25 - correcao);
+                    backLeft.setPower(-0.25 - correcao);
+                    frontRight.setPower(-0.25 + correcao); //VAI PARA FRENTE E CORRIGE NA ESQUERDA
+                    backRight.setPower(-0.25 + correcao);
+                } else if (g > A) {
+                    frontLeft.setPower(-0.25 + correcao);
+                    backLeft.setPower(-0.25 + correcao);
+                    frontRight.setPower(-0.25 - correcao); //VAI PARA FRENTE E CORRIGE NA DIREITA
+                    backRight.setPower(-0.25 - correcao);
+                } else {
+                    frontLeft.setPower(-0.25);
+                    backLeft.setPower(-0.25);
+                    frontRight.setPower(-0.25); //VAI PARA FRENTE
+                    backRight.setPower(-0.25);
+                }
+                telemetry.addData("A", A);
+                telemetry.addData("g", g);
+                telemetry.addData("correcao", correcao);
+                telemetry.update();
+            }
+            frontLeft.setPower(0);
+            backLeft.setPower(0);
+            frontRight.setPower(0);
+            backRight.setPower(0);
+            sleep(200);
+
+            //6 - ROTACAO PARA IR ATIRAR INTAKE 2
+            timer.reset();
+            g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+            A = -46.24;
+            while (timer.seconds() < 2) {
+                g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+                double Kp = 0.01;
+                double error = Math.abs(g - A);
+                double correcao = Kp * error;
+
+                correcao = Math.max(Math.min(correcao, r), -r);
+                if (g < A) {
+                    frontLeft.setPower(-correcao);
+                    backLeft.setPower(-correcao);
+                    frontRight.setPower(correcao); //VAI PARA FRENTE E CORRIGE NA ESQUERDA
+                    backRight.setPower(correcao);
+                } else if (g > A) {
+                    frontLeft.setPower(correcao);
+                    backLeft.setPower(correcao);
+                    frontRight.setPower(-correcao); //VAI PARA FRENTE E CORRIGE NA DIREITA
+                    backRight.setPower(-correcao);
+                } else {
+                    frontLeft.setPower(0);
+                    backLeft.setPower(0);
+                    frontRight.setPower(0); //VAI PARA FRENTE
+                    backRight.setPower(0);
+                }
+                telemetry.addData("A", A);
+                telemetry.addData("g", g);
+                telemetry.addData("correcao", correcao);
+                telemetry.update();
+            }
+            frontLeft.setPower(0);
+            backLeft.setPower(0);
+            frontRight.setPower(0);
+            backRight.setPower(0);
+            sleep(200);
+
+            //7 - DIRIGINDO PARA ATIRAR O INTAKE 2
+            timer.reset();
+            g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+            A = -46.24;
+            while (timer.seconds() < 1) {
+                g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+                double Kp = 0.015;
+                double error = g - A;
+                double correcao = Math.abs(Kp * error);
+
+                correcao = Math.max(Math.min(correcao, 0.03), -0.03);
+                if (g < A + 0.3 && g > A - 0.3) {
+                    correcao = 0;
+                }
+
+                if (g < A) {
+                    frontLeft.setPower(-0.3 - correcao);
+                    backLeft.setPower(-0.3 - correcao);
+                    frontRight.setPower(-0.3 + correcao); //VAI PARA FRENTE E CORRIGE NA ESQUERDA
+                    backRight.setPower(-0.3 + correcao);
+                } else if (g > A) {
+                    frontLeft.setPower(-0.3 + correcao);
+                    backLeft.setPower(-0.3 + correcao);
+                    frontRight.setPower(-0.3 - correcao); //VAI PARA FRENTE E CORRIGE NA DIREITA
+                    backRight.setPower(-0.3 - correcao);
+                } else {
+                    frontLeft.setPower(-0.3);
+                    backLeft.setPower(-0.3);
+                    frontRight.setPower(-0.3); //VAI PARA FRENTE
+                    backRight.setPower(-0.3);
+                }
+                telemetry.addData("A", A);
+                telemetry.addData("g", g);
+                telemetry.addData("correcao", correcao);
+                telemetry.update();
+            }
+            frontLeft.setPower(0);
+            backLeft.setPower(0);
+            frontRight.setPower(0);
+            backRight.setPower(0);
+            sleep(200);
+
+            //5 - ROTACAO PARA TIRO DO 1 INTAKE
+            timer.reset();
+            g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+            A = 0;
+            while (timer.seconds() < 3) {
+                g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+                double Kp = 0.01;
+                double error = Math.abs(g - A);
+                double correcao = Kp * error;
+
+                correcao = Math.max(Math.min(correcao, r), -r);
+                if (g < A) {
+                    frontLeft.setPower(-correcao);
+                    backLeft.setPower(-correcao);
+                    frontRight.setPower(correcao); //VAI PARA FRENTE E CORRIGE NA ESQUERDA
+                    backRight.setPower(correcao);
+                } else if (g > A) {
+                    frontLeft.setPower(correcao);
+                    backLeft.setPower(correcao);
+                    frontRight.setPower(-correcao); //VAI PARA FRENTE E CORRIGE NA DIREITA
+                    backRight.setPower(-correcao);
+                } else {
+                    frontLeft.setPower(0);
+                    backLeft.setPower(0);
+                    frontRight.setPower(0); //VAI PARA FRENTE
+                    backRight.setPower(0);
+                }
+                shooter.setPower(shooterforca);
+                telemetry.addData("A", A);
+                telemetry.addData("g", g);
+                telemetry.addData("correcao", correcao);
+                telemetry.update();
+            }
+            frontLeft.setPower(0);
+            backLeft.setPower(0);
+            frontRight.setPower(0);
+            backRight.setPower(0);
+            sleep(200);
+
+            while (timer.seconds() < 7) {
+                intake1.setPower(-0.7);
+                intake2.setPower(-0.7);
+                intake3.setPower(1);
+                telemetry.addData("A", A); // ATIRA NA CESTA
+                telemetry.addData("g", g);
+                telemetry.update();
+            }
+            intake1.setPower(0);
+            intake2.setPower(0);
+            intake3.setPower(0);
+            shooter.setPower(0);
+
+
+            telemetry.addData("Status", "Pick up your controllers..");
             telemetry.update();
         }
     }
