@@ -85,7 +85,7 @@ public class Autonomo extends LinearOpMode {
             //1 - PRIMEIRAS 2 BOLINHAS
             timer.reset();
             g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-            A = g;
+            A = 0;
             while (timer.seconds() < 1.450) {
                 g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
                 double Kp = 0.01;
@@ -140,21 +140,29 @@ public class Autonomo extends LinearOpMode {
             timer.reset();
             g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
             A = -137.88;
-            while (Math.abs(g) < Math.abs(A) + 0.3) {
+            while (timer.seconds() < 3) {
                 g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
                 double Kp = 0.01;
                 double error = Math.abs(g - A);
                 double correcao = Kp * error;
 
-                correcao = Math.max(Math.min(correcao, 0.3), -0.3);
-                if (Math.abs(g) > Math.abs(A) - 0.30 && Math.abs(g) < Math.abs(A) + +0.30 ) {
-                    correcao = 0;
-                }
+                correcao = Math.max(Math.min(correcao, 0.2), -0.2);
+                if (g < A) {
+                    frontLeft.setPower(-correcao);
+                    backLeft.setPower(-correcao);
+                    frontRight.setPower(correcao); //VAI PARA FRENTE E CORRIGE NA ESQUERDA
+                    backRight.setPower(correcao);
+                } else if (g > A) {
                     frontLeft.setPower(correcao);
                     backLeft.setPower(correcao);
                     frontRight.setPower(-correcao); //VAI PARA FRENTE E CORRIGE NA DIREITA
                     backRight.setPower(-correcao);
-                shooter.setPower(shooterforca);
+                } else {
+                    frontLeft.setPower(0);
+                    backLeft.setPower(0);
+                    frontRight.setPower(0); //VAI PARA FRENTE
+                    backRight.setPower(0);
+                }
                 telemetry.addData("A", A);
                 telemetry.addData("g", g);
                 telemetry.update();
@@ -164,6 +172,50 @@ public class Autonomo extends LinearOpMode {
             frontRight.setPower(0);
             backRight.setPower(0);
             sleep(1000);
+
+            //3 - PRIMEIRAS 2 BOLINHAS INTAKE
+            timer.reset();
+            g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+            A = -137.88;
+            while (timer.seconds() < 2) {
+                g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+                double Kp = 0.01;
+                double error = g - A;
+                double correcao = Kp * error;
+
+                correcao = Math.max(Math.min(correcao, 0.1), -0.1);
+                if (Math.abs(g) < Math.abs(A) + 0.30) {
+                    correcao = 0;
+                }
+                if (g < A) {
+                    frontLeft.setPower(0.3 - correcao);
+                    backLeft.setPower(0.3 - correcao);
+                    frontRight.setPower(0.3 + correcao); //VAI PARA FRENTE E CORRIGE NA ESQUERDA
+                    backRight.setPower(0.3 + correcao);
+                } else if (g > A) {
+                    frontLeft.setPower(0.3 + correcao);
+                    backLeft.setPower(0.3 + correcao);
+                    frontRight.setPower(0.3 - correcao); //VAI PARA FRENTE E CORRIGE NA DIREITA
+                    backRight.setPower(0.3 - correcao);
+                } else {
+                    frontLeft.setPower(0.3);
+                    backLeft.setPower(0.3);
+                    frontRight.setPower(0.3); //VAI PARA FRENTE
+                    backRight.setPower(0.3);
+                }
+
+                intake1.setPower(-0.7);
+                intake2.setPower(-0.7);
+                intake3.setPower(1);
+                telemetry.addData("A", A);
+                telemetry.addData("g", g);
+                telemetry.update();
+            }
+            frontLeft.setPower(0);
+            backLeft.setPower(0);
+            frontRight.setPower(0);
+            backRight.setPower(0);
+            sleep(2000);
 
             telemetry.addData("Status", "Autônomo concluído");
             telemetry.update();
