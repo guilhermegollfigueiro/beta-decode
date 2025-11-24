@@ -16,8 +16,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import java.util.List;
 
-@TeleOp(name="BetaOne", group="Linear OpMode")
-public class BetaOne extends LinearOpMode {
+@TeleOp(name="Botão do X", group="Linear OpMode")
+public class botaodoX extends LinearOpMode {
 
     private DcMotorEx frontLeft, frontRight, backLeft, backRight;
     private DcMotorEx intake1, intake2;
@@ -139,16 +139,16 @@ public class BetaOne extends LinearOpMode {
             }
 
             if (frontLeftPower == 0 &&
-             backLeftPower == 0 &&
-             frontRightPower == 0 &&
-             backRightPower == 0) {
+                    backLeftPower == 0 &&
+                    frontRightPower == 0 &&
+                    backRightPower == 0) {
 
-                    if (id == 20 || id == 24) {
-                        frontLeft.setPower(turnPower);
-                        backLeft.setPower(turnPower);
-                        frontRight.setPower(-turnPower);
-                        backRight.setPower(-turnPower);
-                    } else {
+                if (id == 20 || id == 24) {
+                    frontLeft.setPower(turnPower);
+                    backLeft.setPower(turnPower);
+                    frontRight.setPower(-turnPower);
+                    backRight.setPower(-turnPower);
+                } else {
                     frontLeft.setPower(frontLeftPower);
                     backLeft.setPower(backLeftPower);
                     frontRight.setPower(frontRightPower);
@@ -159,30 +159,31 @@ public class BetaOne extends LinearOpMode {
 
             i = -0.8;
 
-            if (gamepad1.right_bumper && !rbWasPressed && timer.seconds() > 1) {
+            if (gamepad1.a && !rbWasPressed && timer.seconds() > 1) {
                 timer.reset();
                 shooterToggle = !shooterToggle;
                 rbWasPressed = true;
             }
-            if (!gamepad1.right_bumper && timer.seconds() > 1) {
+            if (!gamepad1.a && timer.seconds() > 1) {
                 rbWasPressed = false;
             }
 
             if (shooterToggle) {
-                shooter.setPower(i);
+                intake3.setPower(1);
             } else {
-                shooter.setPower(0);
+                intake3.setPower(0);
             }
 
-            if (gamepad1.a) {
-                intake3.setPower(1.0);
+            if (gamepad1.right_bumper) {
+                shooter.setPower(i);
             } else if (gamepad1.left_bumper) {
                 intake1.setPower(-1.0);
                 intake2.setPower(-1.0);
             } else {
                 intake1.setPower(0);
                 intake2.setPower(0);
-                intake3.setPower(0);
+                shooter.setPower(0);
+
             }
 
             telemetry.addData("Distance", distance);

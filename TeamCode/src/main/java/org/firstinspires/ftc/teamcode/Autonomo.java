@@ -24,7 +24,7 @@ public class Autonomo extends LinearOpMode {
     private double x = 0.0;
     private DcMotorEx intake1, intake2;
     private DcMotorEx shooter;
-    private double shooterforca = -0.78;
+    private double shooterforca = -0.633;
     private CRServo intake3;
     private double g;
 
