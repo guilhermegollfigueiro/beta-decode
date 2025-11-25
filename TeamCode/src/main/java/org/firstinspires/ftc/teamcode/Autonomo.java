@@ -327,25 +327,7 @@ public class Autonomo extends LinearOpMode {
                     backRight.setPower(0);
                 }
 
-
-                LLResult result = limelight.getLatestResult();
-
-                tx = result.getTx();
-                targetOffsetAngle_Vertical = result.getTy();
-
-                double limelightMountAngleDegrees = 0.0;
-                double limelightLensHeightInches = 23.98 / 2.54;
-                double goalHeightInches = 75 / 2.54;
-
-                double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
-                double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
-
-                distance = (goalHeightInches - limelightLensHeightInches) / Math.tan(angleToGoalRadians) * 2.54;
-
-                i = -0.3976471 - 0.002820856*distance + 0.000003475936*Math.pow(distance, 2);
-
-                shooterforca = i;
-                shooter.setPower(shooterforca);
+                shooter.setPower(-0.76);
                 telemetry.addData("A", A);
                 telemetry.addData("g", g);
                 telemetry.addData("correcao", correcao);
@@ -686,25 +668,7 @@ public class Autonomo extends LinearOpMode {
                     backRight.setPower(0);
                 }
 
-
-                LLResult result = limelight.getLatestResult();
-
-                tx = result.getTx();
-                targetOffsetAngle_Vertical = result.getTy();
-
-                double limelightMountAngleDegrees = 0.0;
-                double limelightLensHeightInches = 23.98 / 2.54;
-                double goalHeightInches = 75 / 2.54;
-
-                double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
-                double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
-
-                distance = (goalHeightInches - limelightLensHeightInches) / Math.tan(angleToGoalRadians) * 2.54;
-
-                i = -0.3976471 - 0.002820856*distance + 0.000003475936*Math.pow(distance, 2);
-
-                shooterforca = i;
-                shooter.setPower(shooterforca);
+                shooter.setPower(-0.76);
                 telemetry.addData("A", A);
                 telemetry.addData("g", g);
                 telemetry.addData("correcao", correcao);

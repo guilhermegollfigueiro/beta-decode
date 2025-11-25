@@ -136,7 +136,7 @@ public class BetaOne extends LinearOpMode {
              frontRightPower == 0 &&
              backRightPower == 0) {
 
-                    if (id == 20 || id == 24) {
+                    if (id == 20) {
                         frontLeft.setPower(turnPower);
                         backLeft.setPower(turnPower);
                         frontRight.setPower(-turnPower);
@@ -150,7 +150,7 @@ public class BetaOne extends LinearOpMode {
             }
             telemetry.addData("turnpower", turnPower);
 
-            i = -0.5976471 - 0.000964795*distance - 0.000000311943*Math.pow(distance, 2);
+            i = -0.6572527 - 0.0005286172*distance - 0.000000709707*Math.pow(distance, 2);
 
             A = i;
 
