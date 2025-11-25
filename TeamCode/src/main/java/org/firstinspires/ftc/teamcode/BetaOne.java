@@ -28,6 +28,7 @@ public class BetaOne extends LinearOpMode {
     private IMU imu;
     private double i;
     private double Lasttx;
+    private double A = 0.8;
     private int id;
     private double distance;
 
@@ -149,7 +150,9 @@ public class BetaOne extends LinearOpMode {
             }
             telemetry.addData("turnpower", turnPower);
 
-            i = -0.85;
+            i = -0.5976471 - 0.000964795*distance - 0.000000311943*Math.pow(distance, 2);
+
+            A = i;
 
             if (gamepad1.left_bumper) {
                 intake1.setPower(-1.0);
@@ -161,7 +164,7 @@ public class BetaOne extends LinearOpMode {
             }
 
             if (gamepad1.right_bumper) {
-                shooter.setPower(-0.8);
+                shooter.setPower(A);
             } else {
                 shooter.setPower(0);
             }
