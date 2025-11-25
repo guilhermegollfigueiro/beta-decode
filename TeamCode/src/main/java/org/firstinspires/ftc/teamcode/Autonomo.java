@@ -16,19 +16,13 @@ import java.util.concurrent.TimeUnit;
 
 @Autonomous(name = "Autonomo", group = "Linear OpMode")
 public class Autonomo extends LinearOpMode {
-
-    private IMU imu;
     private DcMotorEx frontLeft, frontRight, backLeft, backRight;
-
-    private double i = 0.2;
     private double x = 0.0;
     private DcMotorEx intake1, intake2;
     private DcMotorEx shooter;
-    private double shooterforca = -0.633;
+    private double shooterforca = -0.76;
     private CRServo intake3;
     private double g;
-
-
     private double r = 0.35; //FORÇA DAS ROTAÇÕES
     private double c = 0;
     private double A;
@@ -84,11 +78,11 @@ public class Autonomo extends LinearOpMode {
             }
             ElapsedTime timer = new ElapsedTime();
 
-            //1 - PRIMEIRAS 2 BOLINHAS
+            //1 - INTAKE PRE PRONTO FRENTE DA CESTA E TIRO
             timer.reset();
             g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
             A = 0;
-            while (timer.seconds() < 1.4) {
+            while (timer.seconds() < 1.39) {
                 g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
                 double Kp = 0.015;
                 double error = g - A;
@@ -143,7 +137,7 @@ public class Autonomo extends LinearOpMode {
             timer.reset();
             g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
             A = -137.88;
-            while (timer.seconds() < 2) {
+            while (timer.seconds() < 2.2) {
                 g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
                 double Kp = 0.01;
                 double error = Math.abs(g - A);
@@ -360,7 +354,7 @@ public class Autonomo extends LinearOpMode {
             timer.reset();
             g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
             A = -46.24;
-            while (timer.seconds() < 1.05) {
+            while (timer.seconds() < 0.9) {
                 g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
                 double Kp = 0.015;
                 double error = g - A;
@@ -402,7 +396,7 @@ public class Autonomo extends LinearOpMode {
             timer.reset();
             g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
             A = -137.88;
-            while (timer.seconds() < 2) {
+            while (timer.seconds() < 1.5) {
                 g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
                 double Kp = 0.01;
                 double error = Math.abs(g - A);
@@ -524,8 +518,8 @@ public class Autonomo extends LinearOpMode {
             frontRight.setPower(0);
             backRight.setPower(0);
             sleep(200);
-
-            //6 - ROTACAO PARA IR ATIRAR INTAKE 2
+/*
+            //11 - ROTACAO PARA IR ATIRAR INTAKE 2
             timer.reset();
             g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
             A = -46.24;
@@ -563,11 +557,11 @@ public class Autonomo extends LinearOpMode {
             backRight.setPower(0);
             sleep(200);
 
-            //7 - DIRIGINDO PARA ATIRAR O INTAKE 2
+            //12 - DIRIGINDO PARA ATIRAR O INTAKE 2
             timer.reset();
             g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
             A = -46.24;
-            while (timer.seconds() < 1) {
+            while (timer.seconds() < 1.6) {
                 g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
                 double Kp = 0.015;
                 double error = g - A;
@@ -605,11 +599,11 @@ public class Autonomo extends LinearOpMode {
             backRight.setPower(0);
             sleep(200);
 
-            //5 - ROTACAO PARA TIRO DO 1 INTAKE
+            //13 - ROTACAO PARA TIRO DO 2 INTAKE
             timer.reset();
             g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
             A = 0;
-            while (timer.seconds() < 3) {
+            while (timer.seconds() < 2) {
                 g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
                 double Kp = 0.01;
                 double error = Math.abs(g - A);
@@ -656,7 +650,7 @@ public class Autonomo extends LinearOpMode {
             intake2.setPower(0);
             intake3.setPower(0);
             shooter.setPower(0);
-
+*/
 
             telemetry.addData("Status", "Pick up your controllers..");
             telemetry.update();
