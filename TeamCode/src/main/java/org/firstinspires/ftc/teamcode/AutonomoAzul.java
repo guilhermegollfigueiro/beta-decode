@@ -1,11 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -16,8 +14,8 @@ import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 
 import java.util.concurrent.TimeUnit;
 
-@Autonomous(name = "Autonomo", group = "Linear OpMode")
-public class Autonomo extends LinearOpMode {
+@Autonomous(name = ".Autonomo CESTA Azul", group = "Linear OpMode")
+public class AutonomoAzul extends LinearOpMode {
     private DcMotorEx frontLeft, frontRight, backLeft, backRight;
     private double x = 0.0;
     private DcMotorEx intake1, intake2;
@@ -394,7 +392,7 @@ public class Autonomo extends LinearOpMode {
             timer.reset();
             g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
             A = -46.24;
-            while (timer.seconds() < 0.9) {
+            while (timer.seconds() < 1) {
                 g = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
                 double Kp = 0.015;
                 double error = g - A;

@@ -17,8 +17,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import java.util.List;
 
-@TeleOp(name="Teleoperador Azul", group="Linear OpMode")
-public class BetaOne extends LinearOpMode {
+@TeleOp(name="Teleoperador Vermelho", group="Linear OpMode")
+public class BetaoneRed extends LinearOpMode {
 
     private DcMotor frontLeft, frontRight, backLeft, backRight;
     private DcMotorEx intake1, intake2;
@@ -108,7 +108,7 @@ public class BetaOne extends LinearOpMode {
                 id = fiducial.getFiducialId();
             }
 
-            if (id == 20) {
+            if (id == 24) {
                 tx = result.getTx();
                 targetOffsetAngle_Vertical = result.getTy();
             }
@@ -132,16 +132,16 @@ public class BetaOne extends LinearOpMode {
             }
 
             if (frontLeftPower == 0 &&
-             backLeftPower == 0 &&
-             frontRightPower == 0 &&
-             backRightPower == 0) {
+                    backLeftPower == 0 &&
+                    frontRightPower == 0 &&
+                    backRightPower == 0) {
 
-                    if (id == 20) {
-                        frontLeft.setPower(turnPower);
-                        backLeft.setPower(turnPower);
-                        frontRight.setPower(-turnPower);
-                        backRight.setPower(-turnPower);
-                    } else {
+                if (id == 24) {
+                    frontLeft.setPower(turnPower);
+                    backLeft.setPower(turnPower);
+                    frontRight.setPower(-turnPower);
+                    backRight.setPower(-turnPower);
+                } else {
                     frontLeft.setPower(frontLeftPower);
                     backLeft.setPower(backLeftPower);
                     frontRight.setPower(frontRightPower);
